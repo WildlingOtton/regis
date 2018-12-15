@@ -1,5 +1,5 @@
 {
-    "name": "Photo-Album",
+    "name": "photo-album",
     "version": "1.0.0",
     "private": true,
     "dependencies": {
@@ -10,7 +10,7 @@
         "express-flash": "0.x",
         "express-session": "1.x",
         "mysql": "2.x",
-        "bcrypt": "1.0.x",
+        "bcrypt": "3.0.x",
         "morgan": "1.x",
         "multer": "1.x",
         "node-uuid": "1.x",
