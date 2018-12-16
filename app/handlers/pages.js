@@ -9,7 +9,7 @@ exports.generate = function (req, res) {
     if (req.params.sub_page && req.params.page_name == 'admin')
         page = req.params.page_name + "_" + req.params.sub_page;
 
-    fs.readFile('basic.html', (err, contents) => {
+    fs.readFile('./basic.html', (err, contents) => {
         if (err) {
             send_failure(res, helpers.http_code_for_error(err), err);
             return;
