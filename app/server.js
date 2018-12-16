@@ -9,12 +9,6 @@ var express = require('express'),
     morgan = require('morgan'),
     multer = require('multer');
 
-const { Pool } = require('pg');
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: true
-});
-
 var db = require('./data/db.js'),
     album_hdlr = require('./handlers/albums.js'),
     page_hdlr = require('./handlers/pages.js'),
@@ -79,7 +73,7 @@ function verifyLoggedOut(req, res, next) {
 }
 
 passport.use(new LocalStrategy(
-    function (username, password, done) {
+    function(username, password, done) {
         user_hdlr.authenticate_user(username, password, (err, user) => {
             if (err && err.code == "invalid_credentials") {
                 return done(null, false, {
@@ -96,11 +90,11 @@ passport.use(new LocalStrategy(
     }
 ));
 
-passport.serializeUser(function (user, done) {
+passport.serializeUser(function(user, done) {
     done(null, user.uuid);
 });
 
-passport.deserializeUser(function (userid, done) {
+passport.deserializeUser(function(userid, done) {
     user_hdlr.user_by_uuid(userid, (err, user) => {
         if (err) {
             done(err, null);
@@ -116,41 +110,28 @@ app.put('/v1/albums.json', alwaysAuthenticated, album_hdlr.create_album);
 app.get('/v1/albums/:album_name.json', album_hdlr.album_by_name);
 app.get('/v1/albums/:album_name/photos.json', album_hdlr.photos_for_album);
 app.put('/v1/albums/:album_name/photos.json',
-    alwaysAuthenticated,
-    upload.single("photo_file"),
-    album_hdlr.add_photo_to_album);
-
-app.get('/db', async (req, res) => {
-    try {
-        const client = await pool.connect()
-        const result = await client.query('SELECT * FROM test_table');
-        const results = { 'results': (result) ? result.rows : null };
-        res.render('pages/db', results);
-        client.release();
-    } catch (err) {
-        console.error(err);
-        res.send("Error " + err);
-    }
-})
+        alwaysAuthenticated,
+        upload.single("photo_file"),
+        album_hdlr.add_photo_to_album);
 
 app.put('/v1/users.json', user_hdlr.register);
 
 app.get('/pages/:page_name', pageAuthenticatedOrNot, page_hdlr.generate);
 app.get('/pages/:page_name/:sub_page',
-    pageAuthenticatedOrNot,
-    page_hdlr.generate);
+        pageAuthenticatedOrNot,
+        page_hdlr.generate);
 
 app.post("/service/login",
-    passport.authenticate('local', {
-        failureRedirect: '/pages/login?fail',
-    }),
-    function (req, res) {
-        res.cookie("username", req.user.display_name);
-        res.redirect("/pages/admin/home");
-    }
-);
+         passport.authenticate('local', {
+             failureRedirect: '/pages/login?fail',
+         }),
+         function (req, res) {
+             res.cookie("username", req.user.display_name);
+             res.redirect("/pages/admin/home");
+         }
+        );
 
-app.get('/service/logout', function (req, res) {
+app.get('/service/logout', function(req, res){
     res.cookie("username", "");
     req.logout();
     res.redirect('/');
@@ -165,14 +146,11 @@ app.get("/", function (req, res) {
 app.get('*', four_oh_four);
 
 function four_oh_four(req, res) {
-    res.writeHead(404, { "Content-Type": "application/json" });
+    res.writeHead(404, { "Content-Type" : "application/json" });
     res.end(JSON.stringify(helpers.invalid_resource()) + "\n");
 }
 
 
 db.init();
-
-app.listen(process.env.PORT || 3000, function () {
-    console.log("Express server listening on port %d in %s mode", this.address().port, app.settings.env);
-});
+app.listen(8080);
 
